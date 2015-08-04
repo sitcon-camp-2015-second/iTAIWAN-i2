@@ -1,0 +1,39 @@
+#main {
+  height: 100vh;
+  display: flex;
+}
+
+#left {
+  width: 35vw;
+  min-width: 360px;
+  min-height: 1px;
+  /*background-color: red;*/
+}
+
+#right {
+  flex: 1 1 auto;
+  position: relative;
+  /*background-color: blue;*/
+}
+
+#mapContainer {
+  position: absolute;
+  top: 0; right: 0;
+  left: 0; bottom: 0;
+  background-color: red;
+}
+
+@media screen and (max-width: 767px) {
+  #main {
+    height: auto;
+    flex-direction: column;
+  }
+
+  #left {
+  	width: 100vw;
+  }
+
+  #right {
+  	height: 60vh;
+  }
+}
