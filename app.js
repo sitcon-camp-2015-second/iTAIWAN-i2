@@ -29,7 +29,6 @@ function csv2json(csv, headers) {
 // test case:
 // csv2json('111,222,333,"444"\n555,666,777,"888"\n,1,2,3', ['A','B','C','D'])
 
-
 $.ajax({
   url: 'hotspotlist.csv',
   success: function(resp) {
@@ -37,3 +36,20 @@ $.ajax({
     console.log(csv2json(resp, ["owner","area","name","addr","lng","lat"]))
   }
 });
+
+var mapConf = {
+  boundary: [[21.5, 119], [25.5, 123]]
+};
+
+
+// load OSM
+var map = L.map('mapContainer', {
+  minZoom: 9,
+  maxBounds: mapConf.boundary
+}).setView([25.059, 121.557], 11);
+
+L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+  // buffer: 4,
+  bounds: mapConf.boundary,
+  attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+}).addTo(map);
