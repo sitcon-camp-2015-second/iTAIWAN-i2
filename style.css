@@ -1,3 +1,11 @@
+html, body {
+  box-sizing: content-box;
+}
+
+* {
+  box-sizing: inherit;
+}
+
 #main {
   height: 100vh;
   display: flex;
@@ -10,26 +18,28 @@
 }
 
 #left {
-  background-image: url(images/background2.png);
-  background-size: cover;
-  background-position: 0;
+  background-image: url(images/background-h.png);
   background-repeat: no-repeat no-repeat;
   background-attachment: fixed;
+  background-size: cover;
   width: 35vw;
+  /* place github ribbon correctly */
+  position: relative;
   min-width: 360px;
-  padding: 8px;
   z-index: 1;
   overflow: auto;
   box-shadow: 16px 0 24px 2px rgba(0, 0, 0, 0.14),
                6px 0 30px 5px rgba(0, 0, 0, 0.12),
                8px 0 10px -5px rgba(0, 0, 0, 0.2);
-  /*background-color: red;*/
+}
+
+#left > div {
+  margin: 16px;
 }
 
 #right {
   flex: 1 1 auto;
   position: relative;
-  /*background-color: blue;*/
 }
 
 #mapContainer {
@@ -55,15 +65,32 @@
   cursor: pointer;
   list-style-type: none;
   line-height: 31px;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid rgba(221, 221, 221, .6);
 }
 
 #searchBox {
   flex: 1 1 auto;
+  margin-right: 8px;
+}
+
+#nearestInfo {
+  margin: 16px 4px;
 }
 
 .flex {
   display: flex;
+}
+
+.small {
+  font-size: .7em;
+}
+
+.float-right {
+  float: right;
+}
+
+.clearfix {
+  clear: both;
 }
 
 button {
@@ -112,11 +139,16 @@ input[type=text]:focus {
   }
 
   #left {
-  	width: 100vw;
+  	width: 100%;
   }
 
   #right {
   	height: 60vh;
+  }
+
+  #search-result {
+    max-height: 400px;
+    overflow: auto;
   }
 }
 

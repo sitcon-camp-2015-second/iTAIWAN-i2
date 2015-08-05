@@ -4,7 +4,8 @@ var mapConf = {
   clusterConf: {
     disableClusteringAtZoom: 14,
     spiderfyDistanceMultiplier: 3
-  }
+  },
+  searchResultLimit: 200
 };
 
 (function(rexQuoteStrip) {
@@ -98,14 +99,19 @@ $('#searchBox').on('keyup blur change', function() {
   } else {
     var resultSet = [];
     for (var i = 0, c = hotspotColl.length; i < c; i++) {
-      if (hotspotColl[i].name.toLowerCase().indexOf(val) >= 0) {
+      if (hotspotColl[i].name.toLowerCase().indexOf(val) >= 0
+      || hotspotColl[i].addr.toLowerCase().indexOf(val) >= 0) {
         resultSet.push(i);
       }
     }
     if (resultSet.length) {
       var buf = '';
-      for (var i = 0; i < resultSet.length; i++) {
-        buf += '<li data-idx="' + resultSet[i] + '">' + hotspotColl[resultSet[i]].name + '</li>';
+      for (var i = 0, c = Math.min(resultSet.length, mapConf.searchResultLimit); i < c; i++) {
+      var dist = hotspotColl[resultSet[i]]._distance;
+        buf += '<li data-idx="'
+          + resultSet[i] + '">' + hotspotColl[resultSet[i]].name
+          + (dist ? ('<span class="small float-right">' + (Math.round(dist * 10) / 10) + ' m</span><div class="clearfix"></div>') : '')
+          + '</li>';
       }
       $searchResult.html(buf);
     }
@@ -122,7 +128,7 @@ $('#search-result').on('click', 'li', function() {
   hs._marker.openPopup();
 })
 
-var currPos;
+var currPosMarker;
 var currPosIcon = L.icon({
   iconUrl: 'images/marker-icon-green.png',
   iconRetinaUrl: 'images/marker-icon-green@2x.png',
@@ -131,21 +137,45 @@ var currPosIcon = L.icon({
 // cu
 
 map.on('locationfound', function(evt) {
-  map.setView(evt.latlng, 13);
-  currPos = currPos || L.marker(evt.latlng, {
-    icon: currPosIcon
+  map.setView(evt.latlng, 15);
+  currPosMarker = currPosMarker || L.marker(evt.latlng, {
+    icon: currPosIcon,
+    // force top
+    zIndexOffset: 1e8,
+    title: '現在位置'
   })
     .bindPopup('<h4 class="title">現在位置</h4>')
     .addTo(map);
 
-  currPos.openPopup();
+  // currPosMarker.openPopup();
+
+  // calculate distance
+  var distance = [];
+  for (var i = 0, c = hotspotColl.length; i < c; i++) {
+    var hs = hotspotColl[i];
+    var dist = evt.latlng.distanceTo([hs.lng, hs.lat]);
+    hs._distance = dist;
+    distance.push(dist);
+  }
+
+  // sort the original collection
+  hotspotColl.sort(function(a, b) {
+    return a._distance - b._distance;
+  });
+
+  var nearestHS = hotspotColl[0];
+
+  $('#nearestInfo').html('距離最近的熱點是：<br>'
+    + '<b>' + nearestHS.name + '</b>' + '，' + nearestHS.addr + '，<br/>'
+    + '距離約' + (Math.round(hotspotColl[0]._distance * 10) / 10) + '公尺。');
+
 
   $('#locateButton').removeAttr('disabled').html('定位');
 }).on('locationerror', function(evt) {
   $('#locateButton').removeAttr('disabled').html('定位');
   alert('定位失敗，這一定不是程式的bug XDDD');
 
-})
+});
 
 $('#locateButton').click(function() {
   $(this).html('定位中...').attr('disabled', 'disabled');
@@ -154,4 +184,4 @@ $('#locateButton').click(function() {
     timeout: 60 * 1000
   });
 
-})
+});
