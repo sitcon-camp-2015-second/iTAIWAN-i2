@@ -2,7 +2,8 @@
 var mapConf = {
   boundary: [[21.5, 119], [25.5, 123]],
   clusterConf: {
-  	disableClusteringAtZoom: 14
+    disableClusteringAtZoom: 14,
+    spiderfyDistanceMultiplier: 3
   }
 };
 
@@ -33,28 +34,35 @@ var mapConf = {
   }
 })(/^\s*"(.*)"\s*$/);
 
-// test case:
-// csv2json('111,222,333,"444"\n555,666,777,"888"\n,1,2,3', ['A','B','C','D'])
-
 var hotspotColl = null;
-var hotspotList = [];
 var hotspotMarkers = new L.MarkerClusterGroup(mapConf.clusterConf);
 
 $.ajax({
   url: 'hotspotlist.csv',
   success: function(resp) {
-	//console.log(resp);
+  //console.log(resp);
     hotspotColl = csv2json(resp, ["owner","area","name","addr","lng","lat"]);
     var hs, mkr;
+    var hotspotCat = {};
     // add the icon
     for (var i = 0, c = hotspotColl.length; i < c; i++) {
       hs = hotspotColl[i];
-      mkr = new L.marker([hs.lng, hs.lat], { title: hs.name });
-      mkr.bindPopup('<h4 class="title">' + hs.name + '</h4><p class="address">' + hs.addr + '</p>');
-      hotspotList.push(mkr);
-      // L.marker([hs.lng, hs.lat]).addTo(map);
+      if (!hotspotCat[hs.area]) {
+        hotspotCat[hs.area] = [];
+      }
+      hotspotCat[hs.area].push(hs);
     }
-    hotspotMarkers.addLayers(hotspotList);
+
+    for (var x in hotspotCat) {
+      var hotspotList = [];
+      for (var i = 0, c = hotspotCat[x].length; i < c; i++) {
+        hs = hotspotCat[x][i];
+        mkr = new L.marker([hs.lng, hs.lat], { title: hs.name });
+        mkr.bindPopup('<h4 class="title">' + hs.name + '</h4><p class="address">' + hs.addr + '</p>');
+        hotspotList.push(mkr);
+      }
+      hotspotMarkers.addLayers(hotspotList);
+    }
     map.addLayer(hotspotMarkers);
   }
 });
