@@ -132,6 +132,18 @@ input[type=text]:focus {
   border-bottom-color: #009688;
 }
 
+hr {
+  border: 1px solid #ddd;
+}
+
+footer {
+  font-size: 12px;
+  text-align: center;
+  color: #444;
+  line-height: 1.4;
+
+}
+
 @media screen and (max-width: 767px) {
   #main {
     height: auto;
@@ -143,7 +155,7 @@ input[type=text]:focus {
   }
 
   #right {
-  	height: 60vh;
+  	height: 70vh;
   }
 
   #search-result {
