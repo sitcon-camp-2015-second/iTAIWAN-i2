@@ -37,6 +37,13 @@ var mapConf = {
 var hotspotColl = null;
 var hotspotMarkers = new L.MarkerClusterGroup(mapConf.clusterConf);
 
+hotspotMarkers.on('clusterclick', function(evt) {
+  L.popup()
+    .setLatLng(evt.latlng)
+    .setContent('<p>Hello world!<br />This is a nice popup.</p>')
+    .openOn(map);
+});
+
 $.ajax({
   url: 'hotspotlist.csv',
   success: function(resp) {
@@ -78,3 +85,22 @@ L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
   bounds: mapConf.boundary,
   attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
 }).addTo(map);
+
+var previousVal = null;
+var $searchResult = $('#search-result');
+$('#searchBox').on('keyup blur change', function() {
+  var val = $(this).val().toLowerCase();
+  if ((previousVal && previousVal == val))
+    return false;
+  if (!val) {
+    $searchResult.html('');
+  } else {
+    var resultSet = [];
+    for (var i = 0, c = hotspotColl.length; i < c; i++) {
+      if (hotspotColl[i].name.toLowerCase().indexOf(val) >= 0) {
+        resultSet.push(hotspotColl[i].name);
+      }
+    }
+    $searchResult.html('<li>' + resultSet.join('</li><li>') + '</li>');
+  }
+})
