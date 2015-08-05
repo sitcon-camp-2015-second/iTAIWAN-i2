@@ -66,6 +66,7 @@ $.ajax({
         hs = hotspotCat[x][i];
         mkr = new L.marker([hs.lng, hs.lat], { title: hs.name });
         mkr.bindPopup('<h4 class="title">' + hs.name + '</h4><p class="address">' + hs.addr + '</p>');
+        hs._marker = mkr;
         hotspotList.push(mkr);
       }
       hotspotMarkers.addLayers(hotspotList);
@@ -98,11 +99,27 @@ $('#searchBox').on('keyup blur change', function() {
     var resultSet = [];
     for (var i = 0, c = hotspotColl.length; i < c; i++) {
       if (hotspotColl[i].name.toLowerCase().indexOf(val) >= 0) {
-        resultSet.push(hotspotColl[i].name);
+        resultSet.push(i);
       }
     }
-    $searchResult.html('<li>' + resultSet.join('</li><li>') + '</li>');
+    if (resultSet.length) {
+      var buf = '';
+      for (var i = 0; i < resultSet.length; i++) {
+        buf += '<li data-idx="' + resultSet[i] + '">' + hotspotColl[resultSet[i]].name + '</li>';
+      }
+      $searchResult.html(buf);
+    }
+    else
+      $searchResult.html('查無結果');
   }
+})
+
+$('#search-result').on('click', 'li', function() {
+  var idx = $(this).data('idx');
+  var hs = hotspotColl[idx];
+  if (!idx || !hs) return false;
+  map.setView([hs.lng, hs.lat], 14);
+  hs._marker.openPopup();
 })
 
 var currPos;
@@ -124,7 +141,7 @@ map.on('locationfound', function(evt) {
   $('#locateButton').removeAttr('disabled').html('定位');
 }).on('locationerror', function(evt) {
   $('#locateButton').removeAttr('disabled').html('定位');
-  alert('定位失敗，你的裝置太爛了XDDD');
+  alert('定位失敗，這一定不是程式的bug XDDD');
 
 })
 

@@ -36,6 +36,13 @@
   margin: 0;
 }
 
+#search-result li {
+  cursor: pointer;
+  list-style-type: none;
+  line-height: 31px;
+  border-bottom: 1px solid #ddd;
+}
+
 @media screen and (max-width: 767px) {
   #main {
     height: auto;
