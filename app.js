@@ -126,18 +126,20 @@ var currPos;
 var currPosIcon = L.icon({
   iconUrl: 'images/marker-icon-green.png',
   iconRetinaUrl: 'images/marker-icon-green@2x.png',
+  shadowUrl: 'images/marker-shadow.png'
 });
 // cu
 
 map.on('locationfound', function(evt) {
   map.setView(evt.latlng, 13);
   currPos = currPos || L.marker(evt.latlng, {
-    icon: currPosIcon,
-  }).addTo(map);
-  L.popup()
-    .setLatLng(evt.latlng)
-    .setContent('<h4 class="title">現在位置</h4>')
-    .openOn(map);
+    icon: currPosIcon
+  })
+    .bindPopup('<h4 class="title">現在位置</h4>')
+    .addTo(map);
+
+  currPos.openPopup();
+
   $('#locateButton').removeAttr('disabled').html('定位');
 }).on('locationerror', function(evt) {
   $('#locateButton').removeAttr('disabled').html('定位');
@@ -148,7 +150,8 @@ map.on('locationfound', function(evt) {
 $('#locateButton').click(function() {
   $(this).html('定位中...').attr('disabled', 'disabled');
   map.locate({
-    enableHighAccuracy: true
+    enableHighAccuracy: true,
+    timeout: 60 * 1000
   });
 
 })
