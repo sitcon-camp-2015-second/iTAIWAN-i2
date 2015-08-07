@@ -12,7 +12,9 @@ html, body {
 }
 
 #logo {
-  width: 200px;
+  /* set height to prevent GitHub ribbon overlapping */
+  height: 100px;
+  margin-bottom: 28px;
   -webkit-filter: drop-shadow(0 2px 3px rgba(0,0,0,0.5));
   filter: drop-shadow(0 2px 3px rgba(0,0,0,0.5));
 }
