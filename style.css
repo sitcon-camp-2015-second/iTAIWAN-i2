@@ -72,6 +72,8 @@ html, body {
 
 #searchBox {
   flex: 1 1 auto;
+  /* strange bug in Firefox 39, where the input field would bleed out */
+  min-width: 0;
   margin-right: 8px;
 }
 
