@@ -181,10 +181,9 @@ App.locateButton = {
 }
 
 App.currPos = {
-  icon: L.icon({
+  icon: new L.Icon.Default({
     iconUrl: 'images/marker-icon-green.png',
-    iconRetinaUrl: 'images/marker-icon-green@2x.png',
-    shadowUrl: 'images/marker-shadow.png'
+    iconRetinaUrl: 'images/marker-icon-green@2x.png'
   })
 };
 
