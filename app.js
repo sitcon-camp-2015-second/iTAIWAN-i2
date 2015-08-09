@@ -28,43 +28,69 @@ App.initMap = function() {
 }
 
 App.loadHotspotData = function() {
+  var storageSupported = (localStorage && localStorage.setItem);
+  var storageNS = 'iTaiwan-i2-hotspot-list';
+  var _resp;
+  if (storageSupported) {
+    _resp = localStorage.getItem(storageNS);
+    if (_resp) {
+      // drop if corrupted
+      try {
+        processHotspotData(_resp);
+        return;
+      } catch (e) {}
+    }
+  }
+
   $.ajax({
     url: 'hotspotlist.csv',
     success: function(resp) {
-      var hotspotMarkers = new L.MarkerClusterGroup(App.config.clusterConf);
-      var coll = App.hotspotColl = App.Util.csv2json(resp, ["owner", "area", "name", "addr", "lat", "lng"]);
-      var hs, mkr;
-      var hotspotCat = {};
-      // add the icon
-      for (var i = 0, c = coll.length; i < c; i++) {
-        hs = coll[i];
-        if (!hotspotCat[hs.area]) {
-          hotspotCat[hs.area] = [];
-        }
-        hotspotCat[hs.area].push(hs);
-      }
-
-      for (var x in hotspotCat) {
-        var hotspotList = [];
-        for (var i = 0, c = hotspotCat[x].length; i < c; i++) {
-          hs = hotspotCat[x][i];
-          mkr = new L.marker([hs.lat, hs.lng], { title: hs.name });
-          mkr.bindPopup('<h4 class="title">' + hs.name + '</h4><p class="address">' + hs.addr + '</p>');
-          hs._marker = mkr;
-          hotspotList.push(mkr);
-        }
-        hotspotMarkers.addLayers(hotspotList);
-      }
-      App.map.addLayer(hotspotMarkers);
+      if (storageSupported)
+        localStorage.setItem(storageNS, resp);
+      processHotspotData(resp);
     }
   });
+
+  function processHotspotData(resp) {
+    var coll = App.hotspotColl = App.Util.csv2json(resp, ["owner", "area", "name", "addr", "lat", "lng"]);
+    var hs, mkr;
+    var hotspotCat = {};
+    // add the icon
+    // todo: merge points with the same position;
+    // determining its name by finding LCS of name of points
+    for (var i = 0, c = coll.length; i < c; i++) {
+      hs = coll[i];
+      if (!hotspotCat[hs.area]) {
+        hotspotCat[hs.area] = [];
+      }
+      hotspotCat[hs.area].push(hs);
+    }
+
+    for (var x in hotspotCat) {
+      var hotspotMarkers = new L.MarkerClusterGroup(App.config.clusterConf);
+      var hotspotList = [];
+      for (var i = 0, c = hotspotCat[x].length; i < c; i++) {
+        hs = hotspotCat[x][i];
+        mkr = new L.marker([hs.lat, hs.lng], { title: hs.name });
+        mkr.bindPopup('<h4 class="title">' + hs.name + '</h4><p class="address">' + hs.addr + '</p>');
+        hs._marker = mkr;
+        hotspotList.push(mkr);
+      }
+      hotspotMarkers.addLayers(hotspotList);
+      App.map.addLayer(hotspotMarkers);
+    }
+  }
 };
 
 App.config = {
   boundary: [[21.5, 119], [25.5, 123]],
   clusterConf: {
-    disableClusteringAtZoom: 14,
-    spiderfyDistanceMultiplier: 3
+    disableClusteringAtZoom: 16,
+    maxClusterRadius: function(zoom) {
+      if (zoom <= 11) return 60;
+      if (zoom <= 13) return 40;
+      return 30;
+    }
   },
   initialPosition: [25.059, 121.557],
   searchResultLimit: 200
@@ -113,9 +139,11 @@ App.searchBox = {
   goSearchResult: function() {
     var idx = $(this).data('idx');
     var hs = App.hotspotColl[idx];
-    if (!idx || !hs) return false;
-    App.map.setView([hs.lat, hs.lng], 14);
-    hs._marker.openPopup();
+    if (idx == null || hs == null) return false;
+    // must unpack to open popup...
+    App.map.setView([hs.lat, hs.lng], 16);
+    // wait for cluster unpacking
+    setTimeout(function(){hs._marker.openPopup()}, 500);
   },
   updateSearchResult: function() {
     var val = $(this).val().toLowerCase();

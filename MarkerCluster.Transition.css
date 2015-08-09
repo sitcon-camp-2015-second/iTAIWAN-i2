@@ -1,0 +1,4 @@
+.leaflet-cluster-anim .marker-cluster {
+  -webkit-transition: -webkit-transform 0.3s ease-out, opacity 0.3s ease-in;
+  transition: transform 0.3s ease-out, opacity 0.3s ease-in;
+}
